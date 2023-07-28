@@ -1,0 +1,16 @@
+[Unit]
+Description=Qr Code Server
+After=network.target
+ 
+[Service]
+Environment=QR_SERVER_PORT=3000
+Environment=QR_SERVER_KEY=qr_server
+Type=simple
+User=qr-server
+Group=qr-server
+Restart=on-failure
+RestartSec=5s
+ExecStart=/opt/qr-server/qr-server
+ 
+[Install]
+WantedBy=multi-user.targe
