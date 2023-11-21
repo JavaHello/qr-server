@@ -3,7 +3,10 @@ use std::convert::Infallible;
 
 use image::{png::PngEncoder, Luma};
 use once_cell::sync::Lazy;
+#[cfg(feature = "oxipng")]
+use oxipng::Options;
 use qrcode::QrCode;
+
 static QR_SERVER_KEY: Lazy<String> =
     Lazy::new(|| std::env::var("QR_SERVER_KEY").unwrap_or_else(|_| "qr_server".to_string()));
 
@@ -18,7 +21,7 @@ pub async fn qr_code(req: Request<Body>) -> Result<Response<Body>, Infallible> {
     }
     let b = q.as_bytes();
     let k = QR_SERVER_KEY.as_bytes();
-    let k = vec![&b[32..], k];
+    let k = [&b[32..], k];
     let d = md5::compute(k.concat());
     let d = format!("{:x}", d);
     let c = b.starts_with(d.as_bytes());
@@ -36,6 +39,10 @@ pub async fn qr_code(req: Request<Body>) -> Result<Response<Body>, Infallible> {
         .encode(&image, image.width(), image.height(), image::ColorType::L8)
         .unwrap();
 
+    #[cfg(feature = "oxipng")]
+    {
+        buffer = oxipng::optimize_from_memory(&buffer, &Options::default()).unwrap();
+    }
     Ok(Response::builder()
         .header(header::CONTENT_TYPE, "image/png")
         .header(

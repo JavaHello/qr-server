@@ -5,7 +5,7 @@ fn main() {
     for q in &args[1..] {
         let b = q.as_bytes();
         let k = key.as_bytes();
-        let k = vec![b, k];
+        let k = [b, k];
         let d = md5::compute(k.concat());
         let d = format!("{}?{:x}{}", url, d, urlencoding::encode(q));
         println!("{}", d);
